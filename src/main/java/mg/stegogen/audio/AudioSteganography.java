@@ -128,6 +128,14 @@ public class AudioSteganography {
         }
     }
 
+    private int extractBitFromSample(byte[] audioData, int sampleOffset, int bitsPerSample) {
+        if (bitsPerSample == 8) {
+            return extract8BitSample(audioData, sampleOffset);
+        } else {
+            return extract16BitSample(audioData, sampleOffset);
+        }
+    }
+
     private int extract8BitSample(byte[] audioData, int sampleOffset) {
         int sample = audioData[sampleOffset] & 0xFF;
         return sample & 0x01;

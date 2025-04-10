@@ -2,6 +2,7 @@ package mg.stegogen.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class SteganographyUtils {
@@ -47,4 +48,15 @@ public class SteganographyUtils {
         }
         return binaryBuilder.toString();
     }
+
+    public static short byteArrayToShort(byte[] data, int offset) {
+        return (short) ((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8));
+    }
+
+    public static void writeFile(String filePath, byte[] data) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            fos.write(data);
+        }
+    }
+
 }

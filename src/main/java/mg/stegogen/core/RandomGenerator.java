@@ -17,6 +17,14 @@ public class RandomGenerator {
         this.setSeed(seed);
         this.setCurrentValue(seed);
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                                  Functions                                 */
+    /* -------------------------------------------------------------------------- */
+    public long nextLong() {
+        this.setCurrentValue((this.getMultiplier() * this.getCurrentValue() + this.getIncrement()) % this.getModulus()); 
+        return this.getCurrentValue();
+    }
     
     /* -------------------------------------------------------------------------- */
     /*                                   Getters                                  */

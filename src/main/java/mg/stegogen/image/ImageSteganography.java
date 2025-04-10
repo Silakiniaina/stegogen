@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
@@ -171,5 +172,12 @@ public class ImageSteganography {
         try (FileOutputStream fos = new FileOutputStream(outputPath)) {
             fos.write(newPngStream.toByteArray());
         }
+    }
+
+    private int calculateCrc(byte[] typeBytes, byte[] data) {
+        CRC32 crc = new CRC32();
+        crc.update(typeBytes);
+        crc.update(data);
+        return (int) crc.getValue();
     }
 }

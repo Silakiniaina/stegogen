@@ -225,4 +225,10 @@ public class ImageSteganography {
         crc.update(data);
         return (int) crc.getValue();
     }
+
+    private void validatePositionsCount(int numPositions, int totalPixels) {
+        if (numPositions > totalPixels) {
+            throw new IllegalArgumentException("Requested positions exceed available pixels");
+        }
+    }
 }

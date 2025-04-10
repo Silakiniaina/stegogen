@@ -148,4 +148,12 @@ public class AudioSteganography {
         }
         return 0; // Default return if sample can't be read
     }
+
+    private boolean isEndMarkerFound(StringBuilder binaryMessage) {
+        int length = binaryMessage.length();
+        int markerLength = SteganographyUtils.END_MARKER.length();
+        
+        return length >= markerLength && 
+               binaryMessage.substring(length - markerLength).equals(SteganographyUtils.END_MARKER);
+    }
 }

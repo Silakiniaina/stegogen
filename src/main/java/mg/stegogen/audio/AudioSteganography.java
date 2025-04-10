@@ -9,14 +9,14 @@ public class AudioSteganography {
     private RandomGenerator randomGenerator;
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Constructor                                */
+    /* Constructor */
     /* -------------------------------------------------------------------------- */
     public AudioSteganography(long seed) {
         this.randomGenerator = new RandomGenerator(seed);
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                  Functions                                 */
+    /* Functions */
     /* -------------------------------------------------------------------------- */
     private void validateWavFormat(byte[] audioData) {
         if (audioData.length < 44 ||
@@ -29,11 +29,11 @@ public class AudioSteganography {
     private WavMetadata extractWavMetadata(byte[] audioData) {
         int numChannels = SteganographyUtils.byteArrayToShort(audioData, 22);
         int bitsPerSample = SteganographyUtils.byteArrayToShort(audioData, 34);
-        
+
         if (bitsPerSample != 8 && bitsPerSample != 16) {
             throw new IllegalArgumentException("Only 8-bit or 16-bit WAV files are supported");
         }
-        
+
         return new WavMetadata(numChannels, bitsPerSample);
     }
 
@@ -43,7 +43,7 @@ public class AudioSteganography {
                 return i + 8; // Skip "data" + 4 bytes for chunk size
             }
         }
-        
+
         throw new IllegalArgumentException("Could not find data chunk in WAV file");
     }
 
@@ -59,7 +59,7 @@ public class AudioSteganography {
         if (binaryMessage.length() > numPositions) {
             throw new IllegalArgumentException("Message is too large for the specified number of positions");
         }
-        
+
         if (numPositions > numSamples) {
             throw new IllegalArgumentException("Requested positions exceed available samples");
         }
@@ -68,6 +68,23 @@ public class AudioSteganography {
     private int[] generateRandomPositions(int numPositions, int numSamples) {
         randomGenerator.reset();
         return randomGenerator.generateUniquePositions(numPositions, numSamples);
+    }
+
+    private void embedBinaryMessage(byte[] audioData, String binaryMessage, int[] positions,
+            int dataOffset, WavMetadata metadata) {
+        for (int i = 0; i < binaryMessage.length(); i++) {
+            int sampleIndex = positions[i];
+            int sampleOffset = calculateSampleOffset(dataOffset, sampleIndex, metadata.bytesPerSample,
+                    metadata.numChannels);
+
+            int bitToEmbed = binaryMessage.charAt(i) == '1' ? 1 : 0;
+
+            if (metadata.bitsPerSample == 8) {
+                embed8BitSample(audioData, sampleOffset, bitToEmbed);
+            } else {
+                embed16BitSample(audioData, sampleOffset, bitToEmbed);
+            }
+        }
     }
 
     private int calculateSampleOffset(int dataOffset, int sampleIndex, int bytesPerSample, int numChannels) {
@@ -89,4 +106,3 @@ public class AudioSteganography {
         }
     }
 }
-

@@ -174,6 +174,25 @@ public class ImageSteganography {
         }
     }
 
+    private void writeChunk(ByteArrayOutputStream stream, String chunkType, byte[] data) throws IOException {
+        // Write chunk length (4 bytes)
+        byte[] lengthBytes = new byte[4];
+        SteganographyUtils.writeInt(lengthBytes, 0, data.length);
+        stream.write(lengthBytes);
+        
+        // Write chunk type (4 bytes)
+        stream.write(chunkType.getBytes());
+        
+        // Write chunk data
+        stream.write(data);
+        
+        // Calculate and write CRC (4 bytes)
+        int crc = calculateCrc(chunkType.getBytes(), data);
+        byte[] crcBytes = new byte[4];
+        SteganographyUtils.writeInt(crcBytes, 0, crc);
+        stream.write(crcBytes);
+    }
+
     private int calculateCrc(byte[] typeBytes, byte[] data) {
         CRC32 crc = new CRC32();
         crc.update(typeBytes);

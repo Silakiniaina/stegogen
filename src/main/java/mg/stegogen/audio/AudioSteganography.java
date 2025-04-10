@@ -40,6 +40,22 @@ public class AudioSteganography {
         SteganographyUtils.writeFile(outputAudioPath, audioData);
     }
 
+    public String extractMessage(String stegoAudioPath, int numPositions) throws IOException {
+        byte[] audioData = SteganographyUtils.readFile(stegoAudioPath);
+        validateWavFile(audioData);
+
+        WavMetadata metadata = extractWavMetadata(audioData);
+        int dataOffset = findDataChunk(audioData);
+
+        int numSamples = calculateNumSamples(audioData, dataOffset, metadata.bytesPerSample, metadata.numChannels);
+        validatePositionsCount(numPositions, numSamples);
+
+        int[] positions = generateRandomPositions(numPositions, numSamples);
+        String extractedMessage = extractBinaryMessage(audioData, positions, dataOffset, metadata);
+
+        return extractedMessage;
+    }
+
     private void validateWavFormat(byte[] audioData) {
         if (audioData.length < 44 ||
                 audioData[0] != 'R' || audioData[1] != 'I' || audioData[2] != 'F' || audioData[3] != 'F' ||
@@ -140,21 +156,23 @@ public class AudioSteganography {
         }
     }
 
-    private String extractBinaryMessage(byte[] audioData, int[] positions, int dataOffset, WavMetadata metadata) throws IOException {
+    private String extractBinaryMessage(byte[] audioData, int[] positions, int dataOffset, WavMetadata metadata)
+            throws IOException {
         StringBuilder binaryMessage = new StringBuilder();
-        
+
         for (int i = 0; i < positions.length; i++) {
             int sampleIndex = positions[i];
-            int sampleOffset = calculateSampleOffset(dataOffset, sampleIndex, metadata.bytesPerSample, metadata.numChannels);
-            
+            int sampleOffset = calculateSampleOffset(dataOffset, sampleIndex, metadata.bytesPerSample,
+                    metadata.numChannels);
+
             int extractedBit = extractBitFromSample(audioData, sampleOffset, metadata.bitsPerSample);
             binaryMessage.append(extractedBit);
-            
+
             if (isEndMarkerFound(binaryMessage)) {
                 return trimEndMarker(binaryMessage);
             }
         }
-        
+
         throw new IOException("No hidden code found or code is corrupted");
     }
 
@@ -182,9 +200,9 @@ public class AudioSteganography {
     private boolean isEndMarkerFound(StringBuilder binaryMessage) {
         int length = binaryMessage.length();
         int markerLength = SteganographyUtils.END_MARKER.length();
-        
-        return length >= markerLength && 
-               binaryMessage.substring(length - markerLength).equals(SteganographyUtils.END_MARKER);
+
+        return length >= markerLength &&
+                binaryMessage.substring(length - markerLength).equals(SteganographyUtils.END_MARKER);
     }
 
     private String trimEndMarker(StringBuilder binaryMessage) {

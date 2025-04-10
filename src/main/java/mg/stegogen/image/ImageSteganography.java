@@ -3,6 +3,7 @@ package mg.stegogen.image;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import mg.stegogen.core.RandomGenerator;
 
@@ -32,4 +33,10 @@ public class ImageSteganography {
         return fileData;
     }
 
+
+    private void validatePngSignature(byte[] pngData) {
+        if (pngData.length < 8 || !Arrays.equals(Arrays.copyOfRange(pngData, 0, 8), PNG_SIGNATURE)) {
+            throw new IllegalArgumentException("Not a valid PNG file");
+        }
+    }
 }

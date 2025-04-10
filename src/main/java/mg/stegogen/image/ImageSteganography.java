@@ -100,6 +100,15 @@ public class ImageSteganography {
         return decompressedStream.toByteArray();
     }
 
+    private void validateMessageSize(String binaryMessage, int numPositions, int totalPixels) {
+        if (binaryMessage.length() > numPositions) {
+            throw new IllegalArgumentException("Message is too large for the specified number of positions");
+        }
+        if (numPositions > totalPixels) {
+            throw new IllegalArgumentException("Requested positions exceed available pixels");
+        }
+    }
+
     private int[] generateRandomPositions(int numPositions, int totalPixels) {
         randomGenerator.reset();
         return randomGenerator.generateUniquePositions(numPositions, totalPixels);

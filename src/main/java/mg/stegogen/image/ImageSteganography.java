@@ -99,4 +99,9 @@ public class ImageSteganography {
         
         return decompressedStream.toByteArray();
     }
+
+    private int[] generateRandomPositions(int numPositions, int totalPixels) {
+        randomGenerator.reset();
+        return randomGenerator.generateUniquePositions(numPositions, totalPixels);
+    }
 }

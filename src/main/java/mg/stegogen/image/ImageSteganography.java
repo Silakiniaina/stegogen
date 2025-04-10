@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
@@ -87,7 +89,7 @@ public class ImageSteganography {
 
     private byte[] decompressData(byte[] compressedData) throws IOException {
         ByteArrayOutputStream decompressedStream = new ByteArrayOutputStream();
-        
+
         try (InflaterInputStream inflaterStream = new InflaterInputStream(
                 new ByteArrayInputStream(compressedData), new Inflater())) {
             byte[] buffer = new byte[4096];
@@ -96,7 +98,7 @@ public class ImageSteganography {
                 decompressedStream.write(buffer, 0, read);
             }
         }
-        
+
         return decompressedStream.toByteArray();
     }
 
@@ -114,7 +116,8 @@ public class ImageSteganography {
         return randomGenerator.generateUniquePositions(numPositions, totalPixels);
     }
 
-    private void embedBinaryMessage(byte[] decompressedData, String binaryMessage, int[] positions, int width, int scanlineLength, int bytesPerPixel) {
+    private void embedBinaryMessage(byte[] decompressedData, String binaryMessage, int[] positions, int width,
+            int scanlineLength, int bytesPerPixel) {
         for (int i = 0; i < binaryMessage.length(); i++) {
             int pixelIndex = positions[i];
             int row = pixelIndex / width;
@@ -128,5 +131,16 @@ public class ImageSteganography {
                 decompressedData[dataIndex] = (byte) value;
             }
         }
+    }
+
+    private byte[] recompressData(byte[] decompressedData) throws IOException {
+        ByteArrayOutputStream recompressedStream = new ByteArrayOutputStream();
+
+        try (DeflaterOutputStream deflaterStream = new DeflaterOutputStream(
+                recompressedStream, new Deflater(Deflater.DEFAULT_COMPRESSION))) {
+            deflaterStream.write(decompressedData);
+        }
+
+        return recompressedStream.toByteArray();
     }
 }

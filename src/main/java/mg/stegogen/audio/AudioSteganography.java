@@ -51,5 +51,9 @@ public class AudioSteganography {
         return (audioData.length - dataOffset) / (bytesPerSample * numChannels);
     }
 
+    private String prepareBinaryMessage(String message) {
+        return SteganographyUtils.textToBinary(message) + SteganographyUtils.END_MARKER;
+    }
+
 }
 

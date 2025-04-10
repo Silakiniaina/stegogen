@@ -1,11 +1,9 @@
 package mg.stegogen.image;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Arrays;
 
 import mg.stegogen.core.RandomGenerator;
+import mg.stegogen.utils.SteganographyUtils;
 
 public class ImageSteganography {
 
@@ -26,5 +24,33 @@ public class ImageSteganography {
         if (pngData.length < 8 || !Arrays.equals(Arrays.copyOfRange(pngData, 0, 8), PNG_SIGNATURE)) {
             throw new IllegalArgumentException("Not a valid PNG file");
         }
+    }
+
+    private PngMetadata extractPngMetadata(byte[] pngData) {
+        int width = 0;
+        int height = 0;
+        int offset = 8;
+
+        while (offset < pngData.length - 12) {
+            int chunkLength = SteganographyUtils.readInt(pngData, offset);
+            offset += 4;
+
+            String chunkType = new String(pngData, offset, 4);
+            offset += 4;
+
+            if (chunkType.equals("IHDR")) {
+                width = SteganographyUtils.readInt(pngData, offset);
+                height = SteganographyUtils.readInt(pngData, offset + 4);
+                break;
+            }
+
+            offset += chunkLength + 4;
+        }
+
+        if (width == 0 || height == 0) {
+            throw new IllegalArgumentException("Could not determine PNG dimensions");
+        }
+
+        return new PngMetadata(width, height);
     }
 }

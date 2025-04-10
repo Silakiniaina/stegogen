@@ -22,18 +22,6 @@ public class ImageSteganography {
     /* -------------------------------------------------------------------------- */
     /* Functions */
     /* -------------------------------------------------------------------------- */
-    private byte[] readFile(String filePath) throws IOException {
-        File inputFile = new File(filePath);
-        byte[] fileData = new byte[(int) inputFile.length()];
-
-        try (FileInputStream fis = new FileInputStream(inputFile)) {
-            fis.read(fileData);
-        }
-
-        return fileData;
-    }
-
-
     private void validatePngSignature(byte[] pngData) {
         if (pngData.length < 8 || !Arrays.equals(Arrays.copyOfRange(pngData, 0, 8), PNG_SIGNATURE)) {
             throw new IllegalArgumentException("Not a valid PNG file");

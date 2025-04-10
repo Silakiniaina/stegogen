@@ -113,4 +113,20 @@ public class ImageSteganography {
         randomGenerator.reset();
         return randomGenerator.generateUniquePositions(numPositions, totalPixels);
     }
+
+    private void embedBinaryMessage(byte[] decompressedData, String binaryMessage, int[] positions, int width, int scanlineLength, int bytesPerPixel) {
+        for (int i = 0; i < binaryMessage.length(); i++) {
+            int pixelIndex = positions[i];
+            int row = pixelIndex / width;
+            int col = pixelIndex % width;
+            int dataIndex = row * scanlineLength + 1 + col * bytesPerPixel;
+
+            if (dataIndex < decompressedData.length) {
+                int value = decompressedData[dataIndex] & 0xFF;
+                int bitToEmbed = binaryMessage.charAt(i) == '1' ? 1 : 0;
+                value = (value & 0xFE) | bitToEmbed;
+                decompressedData[dataIndex] = (byte) value;
+            }
+        }
+    }
 }

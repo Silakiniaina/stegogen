@@ -226,6 +226,10 @@ public class ImageSteganography {
         return (int) crc.getValue();
     }
 
+    private int extractLSB(byte value) {
+        return (value & 0xFF) & 0x01;
+    }
+
     private void validatePositionsCount(int numPositions, int totalPixels) {
         if (numPositions > totalPixels) {
             throw new IllegalArgumentException("Requested positions exceed available pixels");

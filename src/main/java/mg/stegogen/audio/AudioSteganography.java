@@ -48,6 +48,12 @@ public class AudioSteganography {
         }
     }
 
+    private void validateWavFile(byte[] audioData) {
+        if (audioData.length < 44) {
+            throw new IllegalArgumentException("Not a valid WAV file");
+        }
+    }
+
     private WavMetadata extractWavMetadata(byte[] audioData) {
         int numChannels = SteganographyUtils.byteArrayToShort(audioData, 22);
         int bitsPerSample = SteganographyUtils.byteArrayToShort(audioData, 34);

@@ -73,5 +73,11 @@ public class AudioSteganography {
     private int calculateSampleOffset(int dataOffset, int sampleIndex, int bytesPerSample, int numChannels) {
         return dataOffset + sampleIndex * bytesPerSample * numChannels;
     }
+
+    private void embed8BitSample(byte[] audioData, int sampleOffset, int bitToEmbed) {
+        int sample = audioData[sampleOffset] & 0xFF;
+        sample = (sample & 0xFE) | bitToEmbed;
+        audioData[sampleOffset] = (byte) sample;
+    }
 }
 

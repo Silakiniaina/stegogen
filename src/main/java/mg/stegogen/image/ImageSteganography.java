@@ -1,8 +1,11 @@
 package mg.stegogen.image;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 import mg.stegogen.core.RandomGenerator;
 import mg.stegogen.utils.SteganographyUtils;
@@ -75,5 +78,20 @@ public class ImageSteganography {
         }
 
         return idatData;
+    }
+
+    private byte[] decompressData(byte[] compressedData) throws IOException {
+        ByteArrayOutputStream decompressedStream = new ByteArrayOutputStream();
+        
+        try (InflaterInputStream inflaterStream = new InflaterInputStream(
+                new ByteArrayInputStream(compressedData), new Inflater())) {
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = inflaterStream.read(buffer)) != -1) {
+                decompressedStream.write(buffer, 0, read);
+            }
+        }
+        
+        return decompressedStream.toByteArray();
     }
 }

@@ -59,6 +59,11 @@ public class ImageSteganography {
         return new PngMetadata(width, height);
     }
 
+    private byte[] extractAndDecompressIdatData(byte[] pngData) throws IOException {
+        ByteArrayOutputStream idatData = collectIdatChunks(pngData);
+        return decompressData(idatData.toByteArray());
+    }
+
     private ByteArrayOutputStream collectIdatChunks(byte[] pngData) {
         ByteArrayOutputStream idatData = new ByteArrayOutputStream();
         int offset = 8;

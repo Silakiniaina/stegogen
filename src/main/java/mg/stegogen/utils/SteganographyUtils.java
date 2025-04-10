@@ -47,4 +47,9 @@ public class SteganographyUtils {
         }
         return binaryBuilder.toString();
     }
+
+    public static short byteArrayToShort(byte[] data, int offset) {
+        return (short) ((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8));
+    }
+
 }

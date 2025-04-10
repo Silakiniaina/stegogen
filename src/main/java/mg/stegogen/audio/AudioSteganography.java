@@ -128,6 +128,11 @@ public class AudioSteganography {
         }
     }
 
+    private int extract8BitSample(byte[] audioData, int sampleOffset) {
+        int sample = audioData[sampleOffset] & 0xFF;
+        return sample & 0x01;
+    }
+
     private int extract16BitSample(byte[] audioData, int sampleOffset) {
         if (audioData.length > sampleOffset + 1) {
             int sample = SteganographyUtils.byteArrayToShort(audioData, sampleOffset);

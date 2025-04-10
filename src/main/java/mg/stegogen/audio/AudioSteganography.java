@@ -1,5 +1,7 @@
 package mg.stegogen.audio;
 
+import java.io.IOException;
+
 import mg.stegogen.core.RandomGenerator;
 import mg.stegogen.utils.SteganographyUtils;
 
@@ -18,6 +20,26 @@ public class AudioSteganography {
     /* -------------------------------------------------------------------------- */
     /* Functions */
     /* -------------------------------------------------------------------------- */
+
+    public void embedMessage(String inputAudioPath, String outputAudioPath, String message, int numPositions)
+            throws IOException {
+        byte[] audioData = SteganographyUtils.readFile(inputAudioPath);
+        validateWavFormat(audioData);
+
+        WavMetadata metadata = extractWavMetadata(audioData);
+        int dataOffset = findDataChunk(audioData);
+
+        int numSamples = calculateNumSamples(audioData, dataOffset, metadata.bytesPerSample, metadata.numChannels);
+        String binaryMessage = prepareBinaryMessage(message);
+
+        validateMessageAndPositions(binaryMessage, numPositions, numSamples);
+
+        int[] positions = generateRandomPositions(numPositions, numSamples);
+        embedBinaryMessage(audioData, binaryMessage, positions, dataOffset, metadata);
+
+        SteganographyUtils.writeFile(outputAudioPath, audioData);
+    }
+
     private void validateWavFormat(byte[] audioData) {
         if (audioData.length < 44 ||
                 audioData[0] != 'R' || audioData[1] != 'I' || audioData[2] != 'F' || audioData[3] != 'F' ||
@@ -70,8 +92,8 @@ public class AudioSteganography {
         return randomGenerator.generateUniquePositions(numPositions, numSamples);
     }
 
-    private void embedBinaryMessage(byte[] audioData, String binaryMessage, int[] positions,
-            int dataOffset, WavMetadata metadata) {
+    private void embedBinaryMessage(byte[] audioData, String binaryMessage, int[] positions, int dataOffset,
+            WavMetadata metadata) {
         for (int i = 0; i < binaryMessage.length(); i++) {
             int sampleIndex = positions[i];
             int sampleOffset = calculateSampleOffset(dataOffset, sampleIndex, metadata.bytesPerSample,

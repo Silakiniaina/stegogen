@@ -6,6 +6,17 @@ public class RandomGenerator {
     private long increment;
     private long modulus;
     private long currentValue;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                Constructors                                */
+    /* -------------------------------------------------------------------------- */
+    public RandomGenerator(long seed) {
+        this.setCurrentValue(25214903917L);
+        this.setIncrement( 11L);
+        this.setModulus((1L << 48));
+        this.setSeed(seed);
+        this.setCurrentValue(seed);
+    }
     
     /* -------------------------------------------------------------------------- */
     /*                                   Getters                                  */

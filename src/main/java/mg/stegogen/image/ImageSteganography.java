@@ -29,6 +29,31 @@ public class ImageSteganography {
     /* -------------------------------------------------------------------------- */
     /* Functions */
     /* -------------------------------------------------------------------------- */
+
+    public void embedMessage(String inputImagePath, String outputImagePath, String message, int numPositions)
+            throws IOException {
+        byte[] pngData = SteganographyUtils.readFile(inputImagePath);
+        validatePngSignature(pngData);
+
+        PngMetadata metadata = extractPngMetadata(pngData);
+        int width = metadata.width;
+        int height = metadata.height;
+
+        byte[] decompressedData = extractAndDecompressIdatData(pngData);
+
+        String binaryMessage = SteganographyUtils.textToBinary(message) + SteganographyUtils.END_MARKER;
+        validateMessageSize(binaryMessage, numPositions, width * height);
+
+        int bytesPerPixel = 4;
+        int scanlineLength = width * bytesPerPixel + 1;
+
+        int[] positions = generateRandomPositions(numPositions, width * height);
+        embedBinaryMessage(decompressedData, binaryMessage, positions, width, scanlineLength, bytesPerPixel);
+
+        byte[] recompressedData = recompressData(decompressedData);
+        createOutputPng(pngData, recompressedData, outputImagePath);
+    }
+
     private void validatePngSignature(byte[] pngData) {
         if (pngData.length < 8 || !Arrays.equals(Arrays.copyOfRange(pngData, 0, 8), PNG_SIGNATURE)) {
             throw new IllegalArgumentException("Not a valid PNG file");
@@ -146,17 +171,18 @@ public class ImageSteganography {
         return recompressedStream.toByteArray();
     }
 
-    private void createOutputPng(byte[] originalPngData, byte[] recompressedData, String outputPath) throws IOException {
+    private void createOutputPng(byte[] originalPngData, byte[] recompressedData, String outputPath)
+            throws IOException {
         ByteArrayOutputStream newPngStream = new ByteArrayOutputStream();
         newPngStream.write(PNG_SIGNATURE);
-        
+
         int offset = 8;
         boolean idatWritten = false;
-        
+
         while (offset < originalPngData.length - 12) {
             int chunkLength = SteganographyUtils.readInt(originalPngData, offset);
             String chunkType = new String(originalPngData, offset + 4, 4);
-            
+
             if (chunkType.equals("IDAT")) {
                 offset += 4 + 4 + chunkLength + 4;
                 if (!idatWritten) {
@@ -168,7 +194,7 @@ public class ImageSteganography {
                 offset += 4 + 4 + chunkLength + 4;
             }
         }
-        
+
         try (FileOutputStream fos = new FileOutputStream(outputPath)) {
             fos.write(newPngStream.toByteArray());
         }
@@ -179,13 +205,13 @@ public class ImageSteganography {
         byte[] lengthBytes = new byte[4];
         SteganographyUtils.writeInt(lengthBytes, 0, data.length);
         stream.write(lengthBytes);
-        
+
         // Write chunk type (4 bytes)
         stream.write(chunkType.getBytes());
-        
+
         // Write chunk data
         stream.write(data);
-        
+
         // Calculate and write CRC (4 bytes)
         int crc = calculateCrc(chunkType.getBytes(), data);
         byte[] crcBytes = new byte[4];

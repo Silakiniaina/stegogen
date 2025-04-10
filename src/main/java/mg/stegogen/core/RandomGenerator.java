@@ -90,8 +90,9 @@ public class RandomGenerator {
     /* -------------------------------------------------------------------------- */
     /*                                   Setters                                  */
     /* -------------------------------------------------------------------------- */
-    public void setSeed(long seed) {
-        this.seed = seed;
+    public void setSeed(long newSeed) {
+        seed = newSeed;
+        currentValue = seed;
     }
     public void setMultiplier(long multiplier) {
         this.multiplier = multiplier;

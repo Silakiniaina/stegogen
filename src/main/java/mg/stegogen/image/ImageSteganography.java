@@ -54,6 +54,28 @@ public class ImageSteganography {
         createOutputPng(pngData, recompressedData, outputImagePath);
     }
 
+    public String extractMessage(String stegoImagePath, int numPositions) throws IOException {
+        byte[] pngData = SteganographyUtils.readFile(stegoImagePath);
+        validatePngSignature(pngData);
+
+        PngMetadata metadata = extractPngMetadata(pngData);
+        int width = metadata.width;
+        int height = metadata.height;
+
+        byte[] decompressedData = extractAndDecompressIdatData(pngData);
+
+        validatePositionsCount(numPositions, width * height);
+
+        int bytesPerPixel = 4;
+        int scanlineLength = width * bytesPerPixel + 1;
+
+        int[] positions = generateRandomPositions(numPositions, width * height);
+        String extractedMessage = extractBinaryMessage(decompressedData, positions, width, scanlineLength,
+                bytesPerPixel);
+
+        return extractedMessage;
+    }
+
     private void validatePngSignature(byte[] pngData) {
         if (pngData.length < 8 || !Arrays.equals(Arrays.copyOfRange(pngData, 0, 8), PNG_SIGNATURE)) {
             throw new IllegalArgumentException("Not a valid PNG file");

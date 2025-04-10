@@ -7,5 +7,12 @@ public class AudioSteganography {
 
     private RandomGenerator randomGenerator;
 
+    /* -------------------------------------------------------------------------- */
+    /*                                 Constructor                                */
+    /* -------------------------------------------------------------------------- */
+    public AudioSteganography(long seed) {
+        this.randomGenerator = new RandomGenerator(seed);
+    }
+
 }
 

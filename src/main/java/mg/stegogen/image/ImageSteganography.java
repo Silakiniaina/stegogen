@@ -226,6 +226,29 @@ public class ImageSteganography {
         return (int) crc.getValue();
     }
 
+    private String extractBinaryMessage(byte[] decompressedData, int[] positions, int width,
+            int scanlineLength, int bytesPerPixel) throws IOException {
+        StringBuilder binaryCode = new StringBuilder();
+
+        for (int i = 0; i < positions.length; i++) {
+            int pixelIndex = positions[i];
+            int row = pixelIndex / width;
+            int col = pixelIndex % width;
+            int dataIndex = row * scanlineLength + 1 + col * bytesPerPixel;
+
+            if (dataIndex < decompressedData.length) {
+                int extractedBit = extractLSB(decompressedData[dataIndex]);
+                binaryCode.append(extractedBit);
+
+                if (isEndMarkerFound(binaryCode)) {
+                    return trimEndMarker(binaryCode);
+                }
+            }
+        }
+
+        throw new IOException("No hidden code found or code is corrupted");
+    }
+
     private int extractLSB(byte value) {
         return (value & 0xFF) & 0x01;
     }

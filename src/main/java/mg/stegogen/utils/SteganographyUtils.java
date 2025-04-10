@@ -35,4 +35,16 @@ public class SteganographyUtils {
         bytes[offset + 2] = (byte) ((value >>> 8) & 0xFF);
         bytes[offset + 3] = (byte) (value & 0xFF);
     }
+
+    public static String textToBinary(String text) {
+        StringBuilder binaryBuilder = new StringBuilder();
+        for (char c : text.toCharArray()) {
+            String binary = Integer.toBinaryString(c);
+            while (binary.length() < BITS_PER_BYTE) {
+                binary = "0" + binary;
+            }
+            binaryBuilder.append(binary);
+        }
+        return binaryBuilder.toString();
+    }
 }

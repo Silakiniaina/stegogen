@@ -54,6 +54,12 @@ public class AudioSteganography {
         }
     }
 
+    private void validatePositionsCount(int numPositions, int numSamples) {
+        if (numPositions > numSamples) {
+            throw new IllegalArgumentException("Requested positions exceed available samples");
+        }
+    }
+
     private WavMetadata extractWavMetadata(byte[] audioData) {
         int numChannels = SteganographyUtils.byteArrayToShort(audioData, 22);
         int bitsPerSample = SteganographyUtils.byteArrayToShort(audioData, 34);

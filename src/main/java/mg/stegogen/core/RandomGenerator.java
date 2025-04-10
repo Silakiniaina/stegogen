@@ -63,6 +63,10 @@ public class RandomGenerator {
 
         return positions;
     }
+
+    public void reset() {
+        currentValue = seed;
+    }
     
     /* -------------------------------------------------------------------------- */
     /*                                   Getters                                  */

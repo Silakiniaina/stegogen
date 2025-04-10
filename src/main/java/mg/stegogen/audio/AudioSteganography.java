@@ -37,5 +37,15 @@ public class AudioSteganography {
         return new WavMetadata(numChannels, bitsPerSample);
     }
 
+    private int findDataChunk(byte[] audioData) {
+        for (int i = 12; i < audioData.length - 8; i++) {
+            if (audioData[i] == 'd' && audioData[i + 1] == 'a' && audioData[i + 2] == 't' && audioData[i + 3] == 'a') {
+                return i + 8; // Skip "data" + 4 bytes for chunk size
+            }
+        }
+        
+        throw new IllegalArgumentException("Could not find data chunk in WAV file");
+    }
+
 }
 

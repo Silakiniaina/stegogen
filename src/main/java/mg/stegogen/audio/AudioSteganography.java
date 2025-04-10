@@ -65,5 +65,9 @@ public class AudioSteganography {
         }
     }
 
+    private int[] generateRandomPositions(int numPositions, int numSamples) {
+        randomGenerator.reset();
+        return randomGenerator.generateUniquePositions(numPositions, numSamples);
+    }
 }
 

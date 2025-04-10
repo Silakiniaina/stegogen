@@ -47,5 +47,9 @@ public class AudioSteganography {
         throw new IllegalArgumentException("Could not find data chunk in WAV file");
     }
 
+    private int calculateNumSamples(byte[] audioData, int dataOffset, int bytesPerSample, int numChannels) {
+        return (audioData.length - dataOffset) / (bytesPerSample * numChannels);
+    }
+
 }
 

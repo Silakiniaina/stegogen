@@ -2,6 +2,7 @@ package mg.stegogen.image;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.zip.Deflater;
@@ -142,5 +143,33 @@ public class ImageSteganography {
         }
 
         return recompressedStream.toByteArray();
+    }
+
+    private void createOutputPng(byte[] originalPngData, byte[] recompressedData, String outputPath) throws IOException {
+        ByteArrayOutputStream newPngStream = new ByteArrayOutputStream();
+        newPngStream.write(PNG_SIGNATURE);
+        
+        int offset = 8;
+        boolean idatWritten = false;
+        
+        while (offset < originalPngData.length - 12) {
+            int chunkLength = SteganographyUtils.readInt(originalPngData, offset);
+            String chunkType = new String(originalPngData, offset + 4, 4);
+            
+            if (chunkType.equals("IDAT")) {
+                offset += 4 + 4 + chunkLength + 4;
+                if (!idatWritten) {
+                    writeChunk(newPngStream, "IDAT", recompressedData);
+                    idatWritten = true;
+                }
+            } else {
+                newPngStream.write(originalPngData, offset, 4 + 4 + chunkLength + 4);
+                offset += 4 + 4 + chunkLength + 4;
+            }
+        }
+        
+        try (FileOutputStream fos = new FileOutputStream(outputPath)) {
+            fos.write(newPngStream.toByteArray());
+        }
     }
 }

@@ -55,5 +55,15 @@ public class AudioSteganography {
         return SteganographyUtils.textToBinary(message) + SteganographyUtils.END_MARKER;
     }
 
+    private void validateMessageAndPositions(String binaryMessage, int numPositions, int numSamples) {
+        if (binaryMessage.length() > numPositions) {
+            throw new IllegalArgumentException("Message is too large for the specified number of positions");
+        }
+        
+        if (numPositions > numSamples) {
+            throw new IllegalArgumentException("Requested positions exceed available samples");
+        }
+    }
+
 }
 

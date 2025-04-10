@@ -156,4 +156,9 @@ public class AudioSteganography {
         return length >= markerLength && 
                binaryMessage.substring(length - markerLength).equals(SteganographyUtils.END_MARKER);
     }
+
+    private String trimEndMarker(StringBuilder binaryMessage) {
+        int endMarkerLength = SteganographyUtils.END_MARKER.length();
+        return binaryMessage.substring(0, binaryMessage.length() - endMarkerLength);
+    }
 }

@@ -79,5 +79,14 @@ public class AudioSteganography {
         sample = (sample & 0xFE) | bitToEmbed;
         audioData[sampleOffset] = (byte) sample;
     }
+
+    private void embed16BitSample(byte[] audioData, int sampleOffset, int bitToEmbed) {
+        if (audioData.length > sampleOffset + 1) {
+            int sample = SteganographyUtils.byteArrayToShort(audioData, sampleOffset);
+            sample = (sample & 0xFFFE) | bitToEmbed;
+            audioData[sampleOffset] = (byte) (sample & 0xFF);
+            audioData[sampleOffset + 1] = (byte) ((sample >> 8) & 0xFF);
+        }
+    }
 }
 

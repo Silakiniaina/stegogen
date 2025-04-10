@@ -69,5 +69,9 @@ public class AudioSteganography {
         randomGenerator.reset();
         return randomGenerator.generateUniquePositions(numPositions, numSamples);
     }
+
+    private int calculateSampleOffset(int dataOffset, int sampleIndex, int bytesPerSample, int numChannels) {
+        return dataOffset + sampleIndex * bytesPerSample * numChannels;
+    }
 }
 

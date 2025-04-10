@@ -128,6 +128,24 @@ public class AudioSteganography {
         }
     }
 
+    private String extractBinaryMessage(byte[] audioData, int[] positions, int dataOffset, WavMetadata metadata) throws IOException {
+        StringBuilder binaryMessage = new StringBuilder();
+        
+        for (int i = 0; i < positions.length; i++) {
+            int sampleIndex = positions[i];
+            int sampleOffset = calculateSampleOffset(dataOffset, sampleIndex, metadata.bytesPerSample, metadata.numChannels);
+            
+            int extractedBit = extractBitFromSample(audioData, sampleOffset, metadata.bitsPerSample);
+            binaryMessage.append(extractedBit);
+            
+            if (isEndMarkerFound(binaryMessage)) {
+                return trimEndMarker(binaryMessage);
+            }
+        }
+        
+        throw new IOException("No hidden code found or code is corrupted");
+    }
+
     private int extractBitFromSample(byte[] audioData, int sampleOffset, int bitsPerSample) {
         if (bitsPerSample == 8) {
             return extract8BitSample(audioData, sampleOffset);

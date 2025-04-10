@@ -1,5 +1,7 @@
 package mg.stegogen.image;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 import mg.stegogen.core.RandomGenerator;
@@ -52,5 +54,26 @@ public class ImageSteganography {
         }
 
         return new PngMetadata(width, height);
+    }
+
+    private ByteArrayOutputStream collectIdatChunks(byte[] pngData) {
+        ByteArrayOutputStream idatData = new ByteArrayOutputStream();
+        int offset = 8;
+
+        while (offset < pngData.length - 12) {
+            int chunkLength = SteganographyUtils.readInt(pngData, offset);
+            offset += 4;
+
+            String chunkType = new String(pngData, offset, 4);
+            offset += 4;
+
+            if (chunkType.equals("IDAT")) {
+                idatData.write(pngData, offset, chunkLength);
+            }
+
+            offset += chunkLength + 4;
+        }
+
+        return idatData;
     }
 }

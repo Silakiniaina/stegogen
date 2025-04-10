@@ -28,4 +28,11 @@ public class SteganographyUtils {
 
         return fileData;
     }
+
+    public static void writeInt(byte[] bytes, int offset, int value) {
+        bytes[offset] = (byte) ((value >>> 24) & 0xFF);
+        bytes[offset + 1] = (byte) ((value >>> 16) & 0xFF);
+        bytes[offset + 2] = (byte) ((value >>> 8) & 0xFF);
+        bytes[offset + 3] = (byte) (value & 0xFF);
+    }
 }

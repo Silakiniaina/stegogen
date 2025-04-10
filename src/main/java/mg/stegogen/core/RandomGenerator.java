@@ -25,6 +25,24 @@ public class RandomGenerator {
         this.setCurrentValue((this.getMultiplier() * this.getCurrentValue() + this.getIncrement()) % this.getModulus()); 
         return this.getCurrentValue();
     }
+
+    public int nextInt(int bound) {
+        if (bound <= 0) {
+            throw new IllegalArgumentException("Bound must be positive");
+        }
+
+        long result = nextLong();
+        int bits = (int) (result & Integer.MAX_VALUE);
+        int value = bits % bound;
+
+        while (bits - value + (bound - 1) < 0) {
+            result = nextLong();
+            bits = (int) (result & Integer.MAX_VALUE);
+            value = bits % bound;
+        }
+
+        return value;
+    }
     
     /* -------------------------------------------------------------------------- */
     /*                                   Getters                                  */

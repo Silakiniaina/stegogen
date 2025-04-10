@@ -238,6 +238,11 @@ public class ImageSteganography {
                 binaryCode.substring(codeLength - markerLength).equals(SteganographyUtils.END_MARKER);
     }
 
+    private String trimEndMarker(StringBuilder binaryCode) {
+        int endMarkerLength = SteganographyUtils.END_MARKER.length();
+        return binaryCode.substring(0, binaryCode.length() - endMarkerLength);
+    }
+
     private void validatePositionsCount(int numPositions, int totalPixels) {
         if (numPositions > totalPixels) {
             throw new IllegalArgumentException("Requested positions exceed available pixels");

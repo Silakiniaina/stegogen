@@ -43,6 +43,26 @@ public class RandomGenerator {
 
         return value;
     }
+
+    public int[] generateUniquePositions(int count, int bound) {
+        if (count > bound) {
+            throw new IllegalArgumentException("Cannot generate more unique positions than the bound");
+        }
+
+        int[] positions = new int[count];
+        boolean[] used = new boolean[bound];
+        int generated = 0;
+
+        while (generated < count) {
+            int pos = nextInt(bound);
+            if (!used[pos]) {
+                positions[generated++] = pos;
+                used[pos] = true;
+            }
+        }
+
+        return positions;
+    }
     
     /* -------------------------------------------------------------------------- */
     /*                                   Getters                                  */

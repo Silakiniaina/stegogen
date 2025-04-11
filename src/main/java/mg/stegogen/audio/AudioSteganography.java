@@ -3,9 +3,10 @@ package mg.stegogen.audio;
 import java.io.IOException;
 
 import mg.stegogen.core.RandomGenerator;
+import mg.stegogen.gui.BaseSteganography;
 import mg.stegogen.utils.SteganographyUtils;
 
-public class AudioSteganography {
+public class AudioSteganography extends BaseSteganography{
     private static final int BITS_PER_BYTE = 8;
 
     private RandomGenerator randomGenerator;
@@ -14,13 +15,14 @@ public class AudioSteganography {
     /* Constructor */
     /* -------------------------------------------------------------------------- */
     public AudioSteganography(long seed) {
-        this.randomGenerator = new RandomGenerator(seed);
+        super(seed);
     }
 
     /* -------------------------------------------------------------------------- */
     /* Functions */
     /* -------------------------------------------------------------------------- */
 
+    @Override
     public void embedMessage(String inputAudioPath, String outputAudioPath, String message, int numPositions)
             throws IOException {
         byte[] audioData = SteganographyUtils.readFile(inputAudioPath);
@@ -40,6 +42,7 @@ public class AudioSteganography {
         SteganographyUtils.writeFile(outputAudioPath, audioData);
     }
 
+    @Override
     public String extractMessage(String stegoAudioPath, int numPositions) throws IOException {
         byte[] audioData = SteganographyUtils.readFile(stegoAudioPath);
         validateWavFile(audioData);

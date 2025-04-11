@@ -12,9 +12,10 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import mg.stegogen.core.RandomGenerator;
+import mg.stegogen.gui.BaseSteganography;
 import mg.stegogen.utils.SteganographyUtils;
 
-public class ImageSteganography {
+public class ImageSteganography extends BaseSteganography{
 
     private static final byte[] PNG_SIGNATURE = { (byte) 0x89, 'P', 'N', 'G', '\r', '\n', '\u001a', '\n' };
     private RandomGenerator randomGenerator;
@@ -23,13 +24,14 @@ public class ImageSteganography {
     /* Constructor */
     /* -------------------------------------------------------------------------- */
     public ImageSteganography(long seed) {
-        this.randomGenerator = new RandomGenerator(seed);
+        super(seed);
     }
 
     /* -------------------------------------------------------------------------- */
     /* Functions */
     /* -------------------------------------------------------------------------- */
 
+    @Override
     public void embedMessage(String inputImagePath, String outputImagePath, String message, int numPositions)
             throws IOException {
         byte[] pngData = SteganographyUtils.readFile(inputImagePath);
@@ -54,6 +56,7 @@ public class ImageSteganography {
         createOutputPng(pngData, recompressedData, outputImagePath);
     }
 
+    @Override
     public String extractMessage(String stegoImagePath, int numPositions) throws IOException {
         byte[] pngData = SteganographyUtils.readFile(stegoImagePath);
         validatePngSignature(pngData);

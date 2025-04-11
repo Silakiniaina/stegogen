@@ -14,4 +14,12 @@ public abstract class BaseSteganography {
     public BaseSteganography(long seed) {
         this.randomGenerator = new RandomGenerator(seed);
     }
+    
+    /* -------------------------------------------------------------------------- */
+    /*                              Abstract Methods                              */
+    /* -------------------------------------------------------------------------- */
+    public abstract void embedMessage(String inputPath, String outputPath, String message, int numPositions)
+            throws IOException;
+
+    public abstract String extractMessage(String inputPath, int numPositions) throws IOException;
 }

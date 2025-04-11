@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 
 import mg.stegogen.gui.config.MediaType;
 import mg.stegogen.gui.config.OperationType;
@@ -107,5 +108,14 @@ public class SteganographyGUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(resultArea);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Result"));
         add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private FileFilter getFileExtensionFilter() {
+        MediaType mediaType = (MediaType) mediaTypeCombo.getSelectedItem();
+        if (mediaType == MediaType.IMAGE) {
+            return new javax.swing.filechooser.FileNameExtensionFilter("PNG Images", "png");
+        } else {
+            return new javax.swing.filechooser.FileNameExtensionFilter("WAV Audio", "wav");
+        }
     }
 }

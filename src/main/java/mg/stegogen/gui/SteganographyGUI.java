@@ -9,6 +9,7 @@ import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -124,4 +125,21 @@ public class SteganographyGUI extends JFrame {
         inputFileField.setText("");
         outputFileField.setText("");
     }
+
+    private void browseFile(JTextField field, FileFilter filter) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(filter);
+        
+        int result;
+        if (field == outputFileField) {
+            result = fileChooser.showSaveDialog(this);
+        } else {
+            result = fileChooser.showOpenDialog(this);
+        }
+        
+        if (result == JFileChooser.APPROVE_OPTION) {
+            field.setText(fileChooser.getSelectedFile().getAbsolutePath());
+        }
+    }
+    
 }

@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -22,6 +23,7 @@ import mg.stegogen.audio.AudioSteganography;
 import mg.stegogen.gui.config.MediaType;
 import mg.stegogen.gui.config.OperationType;
 import mg.stegogen.image.ImageSteganography;
+import mg.stegogen.utils.SteganographyUtils;
 
 public class SteganographyGUI extends JFrame {
     private JTextField inputFileField, outputFileField, messageField, seedField, positionsField;
@@ -216,5 +218,13 @@ public class SteganographyGUI extends JFrame {
         stego.embedMessage(inputPath, outputPath, message, numPositions);
 
         showSuccess("Message embedded successfully in " + mediaType.toString().toLowerCase() + ".");
+    }
+
+    private void extractMessage(MediaType mediaType, String inputPath, long seed, int numPositions) throws IOException {
+        BaseSteganography stego = createSteganographyInstance(mediaType, seed);
+        String binaryMessage = stego.extractMessage(inputPath, numPositions);
+        
+        String decodedMessage = SteganographyUtils.binaryToText(binaryMessage);
+        showResult("Extracted message: " + decodedMessage);
     }
 }

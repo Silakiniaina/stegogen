@@ -224,6 +224,14 @@ public class SteganographyGUI extends JFrame {
         resultArea.setText(message);
     }
     
+    private void setupEventListeners() {
+        browseInputButton.addActionListener(e -> browseFile(inputFileField, getFileExtensionFilter()));
+        browseOutputButton.addActionListener(e -> browseFile(outputFileField, getFileExtensionFilter()));
+        executeButton.addActionListener(this::executeOperation);
+        operationCombo.addActionListener(e -> updateUIState());
+        mediaTypeCombo.addActionListener(e -> updateFileFieldsBasedOnMediaType());
+    }
+
     private void executeOperation(ActionEvent e) {
         clearResult();
         

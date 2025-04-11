@@ -59,4 +59,16 @@ public class SteganographyUtils {
         }
     }
 
+    public static String binaryToText(String binary) {
+        StringBuilder textBuilder = new StringBuilder();
+        for (int i = 0; i < binary.length(); i += BITS_PER_BYTE) {
+            if (i + BITS_PER_BYTE <= binary.length()) {
+                String byteStr = binary.substring(i, i + BITS_PER_BYTE);
+                int charCode = Integer.parseInt(byteStr, 2);
+                textBuilder.append((char) charCode);
+            }
+        }
+        return textBuilder.toString();
+    }
+
 }

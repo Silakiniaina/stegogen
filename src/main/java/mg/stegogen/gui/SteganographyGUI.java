@@ -209,4 +209,12 @@ public class SteganographyGUI extends JFrame {
         resultArea.setText(message);
     }
     
+
+    private void embedMessage(MediaType mediaType, String inputPath, String outputPath, 
+        String message, long seed, int numPositions) throws IOException {
+        BaseSteganography stego = createSteganographyInstance(mediaType, seed);
+        stego.embedMessage(inputPath, outputPath, message, numPositions);
+
+        showSuccess("Message embedded successfully in " + mediaType.toString().toLowerCase() + ".");
+    }
 }

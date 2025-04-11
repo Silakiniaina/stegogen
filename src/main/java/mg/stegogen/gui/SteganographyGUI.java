@@ -18,8 +18,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
+import mg.stegogen.audio.AudioSteganography;
 import mg.stegogen.gui.config.MediaType;
 import mg.stegogen.gui.config.OperationType;
+import mg.stegogen.image.ImageSteganography;
 
 public class SteganographyGUI extends JFrame {
     private JTextField inputFileField, outputFileField, messageField, seedField, positionsField;
@@ -180,6 +182,14 @@ public class SteganographyGUI extends JFrame {
             if (messageField.getText().isEmpty()) {
                 throw new IllegalArgumentException("Message is required for embedding");
             }
+        }
+    }
+
+    private BaseSteganography createSteganographyInstance(MediaType mediaType, long seed) {
+        if (mediaType == MediaType.IMAGE) {
+            return new ImageSteganography(seed);
+        } else {
+            return new AudioSteganography(seed);
         }
     }
     

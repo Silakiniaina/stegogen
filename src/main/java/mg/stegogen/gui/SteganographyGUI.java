@@ -141,5 +141,12 @@ public class SteganographyGUI extends JFrame {
             field.setText(fileChooser.getSelectedFile().getAbsolutePath());
         }
     }
+
+    private void updateUIState() {
+        boolean isEmbed = operationCombo.getSelectedItem() == OperationType.EMBED;
+        outputFileField.setEnabled(isEmbed);
+        browseOutputButton.setEnabled(isEmbed);
+        messageField.setEnabled(isEmbed);
+    }
     
 }

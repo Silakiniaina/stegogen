@@ -6,11 +6,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -95,5 +97,15 @@ public class SteganographyGUI extends JFrame {
         gbc.gridx = x;
         gbc.gridy = y;
         panel.add(component, gbc);
+    }
+
+    private void setupResultArea() {
+        resultArea = new JTextArea(8, 30);
+        resultArea.setEditable(false);
+        resultArea.setLineWrap(true);
+        resultArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(resultArea);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Result"));
+        add(scrollPane, BorderLayout.CENTER);
     }
 }

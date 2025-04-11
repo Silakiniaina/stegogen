@@ -118,4 +118,10 @@ public class SteganographyGUI extends JFrame {
             return new javax.swing.filechooser.FileNameExtensionFilter("WAV Audio", "wav");
         }
     }
+
+    private void updateFileFieldsBasedOnMediaType() {
+        // Clear file fields when media type changes
+        inputFileField.setText("");
+        outputFileField.setText("");
+    }
 }

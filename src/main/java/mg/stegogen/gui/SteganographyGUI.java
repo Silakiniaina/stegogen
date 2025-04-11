@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
@@ -31,6 +32,17 @@ public class SteganographyGUI extends JFrame {
     private JComboBox<MediaType> mediaTypeCombo;
     private JButton browseInputButton, browseOutputButton, executeButton;
     private JTextArea resultArea;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                 Constructor                                */
+    /* -------------------------------------------------------------------------- */
+    public SteganographyGUI() {
+        setupFrame();
+        setupInputPanel();
+        setupResultArea();
+        setupEventListeners();
+        updateUIState();
+    }
 
     /* -------------------------------------------------------------------------- */
     /*                                  Functions                                 */
@@ -104,6 +116,7 @@ public class SteganographyGUI extends JFrame {
         gbc.gridy = y;
         panel.add(component, gbc);
     }
+
 
     private void setupResultArea() {
         resultArea = new JTextArea(8, 30);
@@ -211,6 +224,28 @@ public class SteganographyGUI extends JFrame {
         resultArea.setText(message);
     }
     
+    private void executeOperation(ActionEvent e) {
+        clearResult();
+        
+        try {
+            // Validate inputs
+            validateInputs();
+            
+            OperationType operation = (OperationType) operationCombo.getSelectedItem();
+            MediaType mediaType = (MediaType) mediaTypeCombo.getSelectedItem();
+            String inputPath = inputFileField.getText();
+            long seed = Long.parseLong(seedField.getText());
+            int numPositions = Integer.parseInt(positionsField.getText());
+            
+            if (operation == OperationType.EMBED) {
+                embedMessage(mediaType, inputPath, outputFileField.getText(), messageField.getText(), seed, numPositions);
+            } else {
+                extractMessage(mediaType, inputPath, seed, numPositions);
+            }
+        } catch (Exception ex) {
+            showError("Error: " + ex.getMessage());
+        }
+    }
 
     private void embedMessage(MediaType mediaType, String inputPath, String outputPath, 
         String message, long seed, int numPositions) throws IOException {

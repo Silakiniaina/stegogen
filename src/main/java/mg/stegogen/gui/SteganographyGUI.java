@@ -1,6 +1,7 @@
 package mg.stegogen.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 
@@ -37,5 +38,11 @@ public class SteganographyGUI extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         return gbc;
+    }
+
+    private void addComponent(JPanel panel, Component component, GridBagConstraints gbc, int x, int y) {
+        gbc.gridx = x;
+        gbc.gridy = y;
+        panel.add(component, gbc);
     }
 }

@@ -192,5 +192,21 @@ public class SteganographyGUI extends JFrame {
             return new AudioSteganography(seed);
         }
     }
+
+    private void clearResult() {
+        resultArea.setText("");
+    }
+    
+    private void showResult(String message) {
+        resultArea.setText(message);
+    }
+    
+    private void showSuccess(String message) {
+        resultArea.setText("Success: " + message);
+    }
+    
+    private void showError(String message) {
+        resultArea.setText(message);
+    }
     
 }

@@ -148,5 +148,39 @@ public class SteganographyGUI extends JFrame {
         browseOutputButton.setEnabled(isEmbed);
         messageField.setEnabled(isEmbed);
     }
+
+    private void validateInputs() {
+        // Validate seed
+        try {
+            Long.parseLong(seedField.getText());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Seed must be a valid number");
+        }
+        
+        // Validate positions
+        try {
+            int positions = Integer.parseInt(positionsField.getText());
+            if (positions <= 0) {
+                throw new IllegalArgumentException("Positions must be a positive number");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Positions must be a valid number");
+        }
+        
+        // Validate files
+        if (inputFileField.getText().isEmpty()) {
+            throw new IllegalArgumentException("Input file is required");
+        }
+        
+        if (operationCombo.getSelectedItem() == OperationType.EMBED) {
+            if (outputFileField.getText().isEmpty()) {
+                throw new IllegalArgumentException("Output file is required for embedding");
+            }
+            
+            if (messageField.getText().isEmpty()) {
+                throw new IllegalArgumentException("Message is required for embedding");
+            }
+        }
+    }
     
 }

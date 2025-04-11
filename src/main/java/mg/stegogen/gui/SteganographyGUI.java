@@ -54,6 +54,11 @@ public class SteganographyGUI extends JFrame {
         setSize(600, 450);
     }
 
+    private void setupInputPanel() {
+        JPanel inputPanel = createInputPanel();
+        add(inputPanel, BorderLayout.NORTH);
+    }
+
     private JPanel createInputPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = createGridBagConstraints();
@@ -116,7 +121,6 @@ public class SteganographyGUI extends JFrame {
         gbc.gridy = y;
         panel.add(component, gbc);
     }
-
 
     private void setupResultArea() {
         resultArea = new JTextArea(8, 30);

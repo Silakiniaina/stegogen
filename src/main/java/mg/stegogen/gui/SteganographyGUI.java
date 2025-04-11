@@ -1,5 +1,7 @@
 package mg.stegogen.gui;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -15,5 +17,15 @@ public class SteganographyGUI extends JFrame {
     private JComboBox<MediaType> mediaTypeCombo;
     private JButton browseInputButton, browseOutputButton, executeButton;
     private JTextArea resultArea;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                  Functions                                 */
+    /* -------------------------------------------------------------------------- */
+    private void setupFrame() {
+        setTitle("Steganography Tool");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+        setSize(600, 450);
+    }
 
 }

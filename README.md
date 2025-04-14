@@ -76,7 +76,7 @@ src/
 ### Embedding a Message
 1. Open the Stegogen application.
 2. Choose an input file (PNG or WAV).
-3. Enter the message to hide (plain text or Huffman-coded data).
+3. Enter the message to hide (plain text or Huffman-coded data) - [Visit Huffman Code](https://github.com/Silakiniaina/huffman-coding).
 4. Specify the output file path.
 5. Click **Embed** to conceal the message.
 

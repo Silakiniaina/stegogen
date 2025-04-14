@@ -119,12 +119,12 @@ public class SteganographyGUI extends JFrame {
         addComponent(panel, browseOutputButton, gbc, 2, 3);
 
         // Message input (only for embedding)
-        addComponent(panel, new JLabel("Message:"), gbc, 0, 4);
+        addComponent(panel, new JLabel("Message(Huffman Code):"), gbc, 0, 4);
         messageField = new JTextField(20);
         addComponent(panel, messageField, gbc, 1, 4);
 
         // Positions input
-        addComponent(panel, new JLabel("Positions:"), gbc, 0, 5);
+        addComponent(panel, new JLabel("Positions (ex : 23,14,124,..):"), gbc, 0, 5);
         positionsField = new JTextField(20);
         addComponent(panel, positionsField, gbc, 1, 5);
 

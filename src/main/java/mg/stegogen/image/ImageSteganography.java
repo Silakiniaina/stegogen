@@ -5,62 +5,79 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Logger;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
-import mg.stegogen.core.RandomGenerator;
+import mg.stegogen.gui.BaseSteganography;
 import mg.stegogen.utils.SteganographyUtils;
 
-public class ImageSteganography {
+public class ImageSteganography extends BaseSteganography {
 
+    private static Logger logger = Logger.getLogger(ImageSteganography.class.getName());
     private static final byte[] PNG_SIGNATURE = { (byte) 0x89, 'P', 'N', 'G', '\r', '\n', '\u001a', '\n' };
-    private RandomGenerator randomGenerator;
 
     /* -------------------------------------------------------------------------- */
-    /* Constructor */
+    /*                                 Constructor                                */
     /* -------------------------------------------------------------------------- */
     public ImageSteganography(long seed) {
-        this.randomGenerator = new RandomGenerator(seed);
+        super(seed);
+        logger.info("Initialized ImageSteganography with seed: " + seed);
     }
 
     /* -------------------------------------------------------------------------- */
-    /* Functions */
+    /*                                  Functions                                 */
     /* -------------------------------------------------------------------------- */
-
+    @Override
     public void embedMessage(String inputImagePath, String outputImagePath, String message, int numPositions)
             throws IOException {
+        logger.info("Starting embedMessage with input: " + inputImagePath + ", output: " + outputImagePath + 
+                   ", message length: " + message.length() + ", positions: " + numPositions);
         byte[] pngData = SteganographyUtils.readFile(inputImagePath);
         validatePngSignature(pngData);
 
         PngMetadata metadata = extractPngMetadata(pngData);
         int width = metadata.width;
         int height = metadata.height;
+        logger.info("Image dimensions: " + width + "x" + height);
 
         byte[] decompressedData = extractAndDecompressIdatData(pngData);
 
-        String binaryMessage = SteganographyUtils.textToBinary(message) + SteganographyUtils.END_MARKER;
+        String binaryMessage = SteganographyUtils.isBinary(message) ? (message + SteganographyUtils.END_MARKER) : 
+                                              (SteganographyUtils.textToBinary(message) + SteganographyUtils.END_MARKER);
+        logger.info("Binary message length: " + binaryMessage.length());
+        if (numPositions < binaryMessage.length()) {
+            logger.severe("numPositions (" + numPositions + ") is less than binary message length (" + binaryMessage.length() + ")");
+            throw new IllegalArgumentException("numPositions must be at least " + binaryMessage.length());
+        }
         validateMessageSize(binaryMessage, numPositions, width * height);
 
         int bytesPerPixel = 4;
         int scanlineLength = width * bytesPerPixel + 1;
 
+        logger.info("Generating random positions");
         int[] positions = generateRandomPositions(numPositions, width * height);
         embedBinaryMessage(decompressedData, binaryMessage, positions, width, scanlineLength, bytesPerPixel);
 
+        logger.info("Recompressing data");
         byte[] recompressedData = recompressData(decompressedData);
         createOutputPng(pngData, recompressedData, outputImagePath);
+        logger.info("embedMessage completed successfully");
     }
 
+    @Override
     public String extractMessage(String stegoImagePath, int numPositions) throws IOException {
+        logger.info("Starting extractMessage from: " + stegoImagePath + ", positions: " + numPositions);
         byte[] pngData = SteganographyUtils.readFile(stegoImagePath);
         validatePngSignature(pngData);
 
         PngMetadata metadata = extractPngMetadata(pngData);
         int width = metadata.width;
         int height = metadata.height;
+        logger.info("Image dimensions: " + width + "x" + height);
 
         byte[] decompressedData = extractAndDecompressIdatData(pngData);
 
@@ -69,24 +86,28 @@ public class ImageSteganography {
         int bytesPerPixel = 4;
         int scanlineLength = width * bytesPerPixel + 1;
 
+        logger.info("Generating random positions");
         int[] positions = generateRandomPositions(numPositions, width * height);
         String extractedMessage = extractBinaryMessage(decompressedData, positions, width, scanlineLength,
                 bytesPerPixel);
-
+        logger.info("Extracted message length: " + extractedMessage.length());
         return extractedMessage;
     }
 
     private void validatePngSignature(byte[] pngData) {
+        logger.info("Validating PNG signature");
         if (pngData.length < 8 || !Arrays.equals(Arrays.copyOfRange(pngData, 0, 8), PNG_SIGNATURE)) {
+            logger.severe("Invalid PNG signature");
             throw new IllegalArgumentException("Not a valid PNG file");
         }
+        logger.info("PNG signature validated successfully");
     }
 
     private PngMetadata extractPngMetadata(byte[] pngData) {
+        logger.info("Extracting PNG metadata");
         int width = 0;
         int height = 0;
         int offset = 8;
-
         while (offset < pngData.length - 12) {
             int chunkLength = SteganographyUtils.readInt(pngData, offset);
             offset += 4;
@@ -97,6 +118,7 @@ public class ImageSteganography {
             if (chunkType.equals("IHDR")) {
                 width = SteganographyUtils.readInt(pngData, offset);
                 height = SteganographyUtils.readInt(pngData, offset + 4);
+                logger.info("Found IHDR chunk - width: " + width + ", height: " + height);
                 break;
             }
 
@@ -104,6 +126,7 @@ public class ImageSteganography {
         }
 
         if (width == 0 || height == 0) {
+            logger.severe("Failed to determine PNG dimensions");
             throw new IllegalArgumentException("Could not determine PNG dimensions");
         }
 
@@ -111,11 +134,15 @@ public class ImageSteganography {
     }
 
     private byte[] extractAndDecompressIdatData(byte[] pngData) throws IOException {
+        logger.info("Extracting and decompressing IDAT data");
         ByteArrayOutputStream idatData = collectIdatChunks(pngData);
-        return decompressData(idatData.toByteArray());
+        byte[] decompressedData = decompressData(idatData.toByteArray());
+        logger.info("IDAT data extracted and decompressed successfully");
+        return decompressedData;
     }
 
     private ByteArrayOutputStream collectIdatChunks(byte[] pngData) {
+        logger.info("Collecting IDAT chunks");
         ByteArrayOutputStream idatData = new ByteArrayOutputStream();
         int offset = 8;
 
@@ -128,15 +155,18 @@ public class ImageSteganography {
 
             if (chunkType.equals("IDAT")) {
                 idatData.write(pngData, offset, chunkLength);
+                logger.info("Collected IDAT chunk of length: " + chunkLength);
             }
 
             offset += chunkLength + 4;
         }
 
+        logger.info("IDAT chunks collection completed");
         return idatData;
     }
 
     private byte[] decompressData(byte[] compressedData) throws IOException {
+        logger.info("Decompressing data");
         ByteArrayOutputStream decompressedStream = new ByteArrayOutputStream();
 
         try (InflaterInputStream inflaterStream = new InflaterInputStream(
@@ -148,25 +178,35 @@ public class ImageSteganography {
             }
         }
 
+        logger.info("Data decompression completed");
         return decompressedStream.toByteArray();
     }
 
     private void validateMessageSize(String binaryMessage, int numPositions, int totalPixels) {
+        logger.info("Validating message size - binary length: " + binaryMessage.length() +
+                ", positions: " + numPositions + ", total pixels: " + totalPixels);
         if (binaryMessage.length() > numPositions) {
+            logger.severe("Message too large for specified positions");
             throw new IllegalArgumentException("Message is too large for the specified number of positions");
         }
         if (numPositions > totalPixels) {
+            logger.severe("Requested positions exceed available pixels");
             throw new IllegalArgumentException("Requested positions exceed available pixels");
         }
+        logger.info("Message size validated successfully");
     }
 
     private int[] generateRandomPositions(int numPositions, int totalPixels) {
-        randomGenerator.reset();
-        return randomGenerator.generateUniquePositions(numPositions, totalPixels);
+        logger.info("Generating " + numPositions + " random positions from " + totalPixels + " pixels");
+        this.getRandomGenerator().reset();
+        int[] positions = this.getRandomGenerator().generateUniquePositions(numPositions, totalPixels);
+        logger.info("Random positions generated successfully");
+        return positions;
     }
 
     private void embedBinaryMessage(byte[] decompressedData, String binaryMessage, int[] positions, int width,
             int scanlineLength, int bytesPerPixel) {
+        logger.info("Embedding binary message of length: " + binaryMessage.length());
         for (int i = 0; i < binaryMessage.length(); i++) {
             int pixelIndex = positions[i];
             int row = pixelIndex / width;
@@ -180,9 +220,11 @@ public class ImageSteganography {
                 decompressedData[dataIndex] = (byte) value;
             }
         }
+        logger.info("Binary message embedded successfully");
     }
 
     private byte[] recompressData(byte[] decompressedData) throws IOException {
+        logger.info("Recompressing data");
         ByteArrayOutputStream recompressedStream = new ByteArrayOutputStream();
 
         try (DeflaterOutputStream deflaterStream = new DeflaterOutputStream(
@@ -190,11 +232,13 @@ public class ImageSteganography {
             deflaterStream.write(decompressedData);
         }
 
+        logger.info("Data recompression completed");
         return recompressedStream.toByteArray();
     }
 
     private void createOutputPng(byte[] originalPngData, byte[] recompressedData, String outputPath)
             throws IOException {
+        logger.info("Creating output PNG: " + outputPath);
         ByteArrayOutputStream newPngStream = new ByteArrayOutputStream();
         newPngStream.write(PNG_SIGNATURE);
 
@@ -210,6 +254,7 @@ public class ImageSteganography {
                 if (!idatWritten) {
                     writeChunk(newPngStream, "IDAT", recompressedData);
                     idatWritten = true;
+                    logger.info("Wrote new IDAT chunk");
                 }
             } else {
                 newPngStream.write(originalPngData, offset, 4 + 4 + chunkLength + 4);
@@ -220,9 +265,11 @@ public class ImageSteganography {
         try (FileOutputStream fos = new FileOutputStream(outputPath)) {
             fos.write(newPngStream.toByteArray());
         }
+        logger.info("Output PNG created successfully");
     }
 
     private void writeChunk(ByteArrayOutputStream stream, String chunkType, byte[] data) throws IOException {
+        logger.info("Writing chunk: " + chunkType);
         // Write chunk length (4 bytes)
         byte[] lengthBytes = new byte[4];
         SteganographyUtils.writeInt(lengthBytes, 0, data.length);
@@ -239,17 +286,22 @@ public class ImageSteganography {
         byte[] crcBytes = new byte[4];
         SteganographyUtils.writeInt(crcBytes, 0, crc);
         stream.write(crcBytes);
+        logger.info("Chunk " + chunkType + " written successfully");
     }
 
     private int calculateCrc(byte[] typeBytes, byte[] data) {
+        logger.info("Calculating CRC");
         CRC32 crc = new CRC32();
         crc.update(typeBytes);
         crc.update(data);
-        return (int) crc.getValue();
+        int crcValue = (int) crc.getValue();
+        logger.info("CRC calculated: " + crcValue);
+        return crcValue;
     }
 
     private String extractBinaryMessage(byte[] decompressedData, int[] positions, int width,
-            int scanlineLength, int bytesPerPixel) throws IOException {
+        int scanlineLength, int bytesPerPixel) throws IOException {
+        logger.info("Extracting binary message");
         StringBuilder binaryCode = new StringBuilder();
 
         for (int i = 0; i < positions.length; i++) {
@@ -261,36 +313,58 @@ public class ImageSteganography {
             if (dataIndex < decompressedData.length) {
                 int extractedBit = extractLSB(decompressedData[dataIndex]);
                 binaryCode.append(extractedBit);
+                logger.fine("Extracted bit " + i + ": " + extractedBit + ", current binaryCode: " + binaryCode);
 
                 if (isEndMarkerFound(binaryCode)) {
-                    return trimEndMarker(binaryCode);
+                    String result = trimEndMarker(binaryCode);
+                    logger.info("Binary message extracted successfully, length: " + result.length());
+                    if (result.length() == 0) {
+                        logger.severe("Extracted message is empty");
+                        throw new IOException("No valid message extracted");
+                    }
+                    return result;
                 }
+            } else {
+                logger.warning("Data index " + dataIndex + " out of bounds for decompressed data length " + decompressedData.length);
             }
         }
 
+        logger.severe("No hidden code found or code is corrupted");
         throw new IOException("No hidden code found or code is corrupted");
     }
 
     private int extractLSB(byte value) {
-        return (value & 0xFF) & 0x01;
+        logger.fine("Extracting LSB from byte");
+        int lsb = (value & 0xFF) & 0x01;
+        logger.fine("LSB extracted: " + lsb);
+        return lsb;
     }
 
     private boolean isEndMarkerFound(StringBuilder binaryCode) {
+        logger.fine("Checking for end marker");
         int codeLength = binaryCode.length();
         int markerLength = SteganographyUtils.END_MARKER.length();
 
-        return codeLength >= markerLength &&
+        boolean found = codeLength >= markerLength &&
                 binaryCode.substring(codeLength - markerLength).equals(SteganographyUtils.END_MARKER);
+        logger.fine("End marker found: " + found);
+        return found;
     }
 
     private String trimEndMarker(StringBuilder binaryCode) {
+        logger.info("Trimming end marker");
         int endMarkerLength = SteganographyUtils.END_MARKER.length();
-        return binaryCode.substring(0, binaryCode.length() - endMarkerLength);
+        String result = binaryCode.substring(0, binaryCode.length() - endMarkerLength);
+        logger.info("End marker trimmed successfully");
+        return result;
     }
 
     private void validatePositionsCount(int numPositions, int totalPixels) {
+        logger.info("Validating positions count: " + numPositions + " against " + totalPixels);
         if (numPositions > totalPixels) {
+            logger.severe("Requested positions exceed available pixels");
             throw new IllegalArgumentException("Requested positions exceed available pixels");
         }
+        logger.info("Positions count validated successfully");
     }
 }

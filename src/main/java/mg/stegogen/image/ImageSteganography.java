@@ -18,19 +18,17 @@ import mg.stegogen.utils.SteganographyUtils;
 public class ImageSteganography extends BaseSteganography{
 
     private static final byte[] PNG_SIGNATURE = { (byte) 0x89, 'P', 'N', 'G', '\r', '\n', '\u001a', '\n' };
-    private RandomGenerator randomGenerator;
 
-    /* -------------------------------------------------------------------------- */
-    /* Constructor */
-    /* -------------------------------------------------------------------------- */
+   /* -------------------------------------------------------------------------- */
+   /*                                 Constructor                                */
+   /* -------------------------------------------------------------------------- */
     public ImageSteganography(long seed) {
         super(seed);
     }
 
     /* -------------------------------------------------------------------------- */
-    /* Functions */
+    /*                                  Functions                                 */
     /* -------------------------------------------------------------------------- */
-
     @Override
     public void embedMessage(String inputImagePath, String outputImagePath, String message, int numPositions)
             throws IOException {
@@ -41,6 +39,7 @@ public class ImageSteganography extends BaseSteganography{
         int width = metadata.width;
         int height = metadata.height;
 
+        System.out.println("Extract and decompress data");
         byte[] decompressedData = extractAndDecompressIdatData(pngData);
 
         String binaryMessage = SteganographyUtils.textToBinary(message) + SteganographyUtils.END_MARKER;
@@ -49,9 +48,11 @@ public class ImageSteganography extends BaseSteganography{
         int bytesPerPixel = 4;
         int scanlineLength = width * bytesPerPixel + 1;
 
+        System.out.println("Generate RandomGenerator");
         int[] positions = generateRandomPositions(numPositions, width * height);
         embedBinaryMessage(decompressedData, binaryMessage, positions, width, scanlineLength, bytesPerPixel);
 
+         System.out.println("Recompress data");
         byte[] recompressedData = recompressData(decompressedData);
         createOutputPng(pngData, recompressedData, outputImagePath);
     }
@@ -164,8 +165,8 @@ public class ImageSteganography extends BaseSteganography{
     }
 
     private int[] generateRandomPositions(int numPositions, int totalPixels) {
-        randomGenerator.reset();
-        return randomGenerator.generateUniquePositions(numPositions, totalPixels);
+        this.getRandomGenerator().reset();
+        return this.getRandomGenerator().generateUniquePositions(numPositions, totalPixels);
     }
 
     private void embedBinaryMessage(byte[] decompressedData, String binaryMessage, int[] positions, int width,

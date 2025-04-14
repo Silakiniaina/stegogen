@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public class SteganographyUtils {
+    private static Logger logger = Logger.getLogger(SteganographyUtils.class.getName());
     public static final int BITS_PER_BYTE = 8;
-    public static final String END_MARKER = "1111111111111111";
+    // Changed END_MARKER to a more distinctive pattern less likely to occur in real data
+    public static final String END_MARKER = "1010101010101010";
 
     /* -------------------------------------------------------------------------- */
     /*                                  Functions                                 */
@@ -20,6 +23,7 @@ public class SteganographyUtils {
     }
 
     public static byte[] readFile(String filePath) throws IOException {
+        logger.info("Reading file: " + filePath);
         File inputFile = new File(filePath);
         byte[] fileData = new byte[(int) inputFile.length()];
 
@@ -38,6 +42,7 @@ public class SteganographyUtils {
     }
 
     public static String textToBinary(String text) {
+        logger.info("Converting text "+text+" to binary");
         StringBuilder binaryBuilder = new StringBuilder();
         for (char c : text.toCharArray()) {
             String binary = Integer.toBinaryString(c);
@@ -46,6 +51,7 @@ public class SteganographyUtils {
             }
             binaryBuilder.append(binary);
         }
+        logger.info("Successfully converted text "+text+" to binary "+binaryBuilder.toString());
         return binaryBuilder.toString();
     }
 
@@ -71,4 +77,14 @@ public class SteganographyUtils {
         return textBuilder.toString();
     }
 
+    public static boolean isBinary(String text) {
+        logger.info("Checking if text is binary: " + text);
+        if (text == null || text.isEmpty()) {
+            logger.info("Text is null or empty, returning false");
+            return false;
+        }
+        boolean isBinary = text.matches("^[01]+$");
+        logger.info("Text is binary: " + isBinary);
+        return isBinary;
+    }
 }

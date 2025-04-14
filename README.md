@@ -73,18 +73,29 @@ src/
 
 ## Usage
 
+### Generate Random positions
+1. Open the Stegogen Application
+2. Choose the tab `Random Positions Generator`
+3. Enter a `seed`, the `number of position to generate` and the `bound` of generation
+4. Click to `Generate Positions`
+
 ### Embedding a Message
 1. Open the Stegogen application.
-2. Choose an input file (PNG or WAV).
-3. Enter the message to hide (plain text or Huffman-coded data) - [Visit Huffman Code](https://github.com/Silakiniaina/huffman-coding).
-4. Specify the output file path.
-5. Click **Embed** to conceal the message.
+2. Choose the Operation type : `Embed`.
+3. Choose the Media Type : `Image` or `Audio`.
+4. Choose an input file (PNG or WAV according to Media Type).
+5. Specify the output file path.
+6. Enter the message to hide (plain text or Huffman-coded data) - [Visit Huffman Code](https://github.com/Silakiniaina/huffman-coding).
+7. Specify the output file path.
+8. Enter all the position to hide each bit (value separated by comma) 
+9. Click **Embed** to conceal the message.
 
 ### Extracting a Message
 1. Launch Stegogen.
-2. Select the stego file (PNG or WAV).
-3. Input the number of embedding positions used (if applicable).
-4. Click **Extract** to reveal the hidden message in binary format.
+2. Choose the Operation type : `Extract`.
+3. Select the stego file that contains the code to read (PNG or WAV).
+4. Enter all the position to hide each bit (value separated by comma)
+5. Click **Extract** to reveal the hidden message in binary format.
 
 ---
 

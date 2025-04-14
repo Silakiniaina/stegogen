@@ -27,7 +27,8 @@ import mg.stegogen.image.ImageSteganography;
 import mg.stegogen.utils.SteganographyUtils;
 
 public class SteganographyGUI extends JFrame {
-    private JTextField inputFileField, outputFileField, messageField, seedField, positionsField;
+    private JTextField inputFileField, outputFileField, messageField, seedField, extractLengthField;
+    private JLabel extractLengthLabel;
     private JComboBox<OperationType> operationCombo;
     private JComboBox<MediaType> mediaTypeCombo;
     private JButton browseInputButton, browseOutputButton, executeButton;
@@ -92,15 +93,16 @@ public class SteganographyGUI extends JFrame {
         messageField = new JTextField(20);
         addComponent(panel, messageField, gbc, 1, 4);
         
-        // Seed input
-        addComponent(panel, new JLabel("Seed:"), gbc, 0, 5);
-        seedField = new JTextField("1234"); // Default seed
-        addComponent(panel, seedField, gbc, 1, 5);
+        // Extract Length input (only visible for extraction)
+        extractLengthLabel = new JLabel("Extract Length:");
+        addComponent(panel, extractLengthLabel, gbc, 0, 5);
+        extractLengthField = new JTextField("0", 20); // Default to 0 which means use END_MARKER
+        addComponent(panel, extractLengthField, gbc, 1, 5);
         
-        // Positions input
-        addComponent(panel, new JLabel("Positions:"), gbc, 0, 6);
-        positionsField = new JTextField("1000"); // Default positions
-        addComponent(panel, positionsField, gbc, 1, 6);
+        // Seed input
+        addComponent(panel, new JLabel("Seed:"), gbc, 0, 6);
+        seedField = new JTextField("1234"); // Default seed
+        addComponent(panel, seedField, gbc, 1, 6);
         
         // Execute button
         executeButton = new JButton("Execute");
@@ -165,9 +167,16 @@ public class SteganographyGUI extends JFrame {
 
     private void updateUIState() {
         boolean isEmbed = operationCombo.getSelectedItem() == OperationType.EMBED;
+        
+        // Update UI elements based on operation type
         outputFileField.setEnabled(isEmbed);
         browseOutputButton.setEnabled(isEmbed);
         messageField.setEnabled(isEmbed);
+        
+        // Extract Length field is only visible and enabled in extract mode
+        extractLengthLabel.setVisible(!isEmbed);
+        extractLengthField.setVisible(!isEmbed);
+        extractLengthField.setEnabled(!isEmbed);
     }
 
     private void validateInputs() {
@@ -176,16 +185,6 @@ public class SteganographyGUI extends JFrame {
             Long.parseLong(seedField.getText());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Seed must be a valid number");
-        }
-        
-        // Validate positions
-        try {
-            int positions = Integer.parseInt(positionsField.getText());
-            if (positions <= 0) {
-                throw new IllegalArgumentException("Positions must be a positive number");
-            }
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Positions must be a valid number");
         }
         
         // Validate files
@@ -201,6 +200,18 @@ public class SteganographyGUI extends JFrame {
             if (messageField.getText().isEmpty()) {
                 throw new IllegalArgumentException("Message is required for embedding");
             }
+        } else {
+            // Validate extract length if it's not empty
+            if (!extractLengthField.getText().isEmpty()) {
+                try {
+                    int extractLength = Integer.parseInt(extractLengthField.getText());
+                    if (extractLength < 0) {
+                        throw new IllegalArgumentException("Extract length must be a non-negative number");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Extract length must be a valid number");
+                }
+            }
         }
     }
 
@@ -210,6 +221,13 @@ public class SteganographyGUI extends JFrame {
         } else {
             return new AudioSteganography(seed);
         }
+    }
+
+    private int calculateRequiredPositions(String message) {
+        // Calculate how many positions are needed for the message plus END_MARKER
+        String binaryMessage = SteganographyUtils.isBinary(message) ? 
+                               message : SteganographyUtils.textToBinary(message);
+        return binaryMessage.length() + SteganographyUtils.END_MARKER.length();
     }
 
     private void clearResult() {
@@ -247,15 +265,31 @@ public class SteganographyGUI extends JFrame {
             MediaType mediaType = (MediaType) mediaTypeCombo.getSelectedItem();
             String inputPath = inputFileField.getText();
             long seed = Long.parseLong(seedField.getText());
-            int numPositions = Integer.parseInt(positionsField.getText());
             
+            System.out.println("Initializing operation");
             if (operation == OperationType.EMBED) {
-                embedMessage(mediaType, inputPath, outputFileField.getText(), messageField.getText(), seed, numPositions);
+                System.out.println("Embedding");
+                String message = messageField.getText();
+                int requiredPositions = calculateRequiredPositions(message);
+                embedMessage(mediaType, inputPath, outputFileField.getText(), message, seed, requiredPositions);
             } else {
-                extractMessage(mediaType, inputPath, seed, numPositions);
+                System.out.println("Extracting");
+                // Get the specified extract length or use a default value
+                int extractLength = 0;
+                try {
+                    extractLength = Integer.parseInt(extractLengthField.getText().trim());
+                } catch (NumberFormatException ex) {
+                    extractLength = 0; // Default to 0 (use END_MARKER)
+                }
+                
+                // If extract length is specified, use it exactly, otherwise use a large number
+                // and rely on finding the END_MARKER
+                int extractPositions = extractLength > 0 ? extractLength : 10000;
+                extractMessage(mediaType, inputPath, seed, extractPositions, extractLength);
             }
         } catch (Exception ex) {
             showError("Error: " + ex.getMessage());
+            ex.printStackTrace(); // For debugging purposes
         }
     }
 
@@ -264,14 +298,20 @@ public class SteganographyGUI extends JFrame {
         BaseSteganography stego = createSteganographyInstance(mediaType, seed);
         stego.embedMessage(inputPath, outputPath, message, numPositions);
 
-        showSuccess("Message embedded successfully in " + mediaType.toString().toLowerCase() + ".");
+        showSuccess("Message embedded successfully in " + mediaType.toString().toLowerCase() + 
+                   ". Used " + numPositions + " positions.");
     }
 
-    private void extractMessage(MediaType mediaType, String inputPath, long seed, int numPositions) throws IOException {
+    private void extractMessage(MediaType mediaType, String inputPath, long seed, 
+                              int numPositions, int extractLength) throws IOException {
         BaseSteganography stego = createSteganographyInstance(mediaType, seed);
         String binaryMessage = stego.extractMessage(inputPath, numPositions);
         
-        String decodedMessage = SteganographyUtils.binaryToText(binaryMessage);
-        showResult("Extracted message: " + decodedMessage);
+        // If an exact extract length was specified, trim the result
+        if (extractLength > 0 && binaryMessage.length() > extractLength) {
+            binaryMessage = binaryMessage.substring(0, extractLength);
+        }
+        
+        showResult("Extracted message: " + binaryMessage);
     }
 }

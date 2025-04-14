@@ -9,19 +9,16 @@ import mg.stegogen.utils.SteganographyUtils;
 public class AudioSteganography extends BaseSteganography{
     private static final int BITS_PER_BYTE = 8;
 
-    private RandomGenerator randomGenerator;
-
     /* -------------------------------------------------------------------------- */
-    /* Constructor */
+    /*                                 Constructor                                */
     /* -------------------------------------------------------------------------- */
     public AudioSteganography(long seed) {
         super(seed);
     }
 
     /* -------------------------------------------------------------------------- */
-    /* Functions */
+    /*                                  Functions                                 */
     /* -------------------------------------------------------------------------- */
-
     @Override
     public void embedMessage(String inputAudioPath, String outputAudioPath, String message, int numPositions)
             throws IOException {
@@ -119,8 +116,8 @@ public class AudioSteganography extends BaseSteganography{
     }
 
     private int[] generateRandomPositions(int numPositions, int numSamples) {
-        randomGenerator.reset();
-        return randomGenerator.generateUniquePositions(numPositions, numSamples);
+        this.getRandomGenerator().reset();
+        return this.getRandomGenerator().generateUniquePositions(numPositions, numSamples);
     }
 
     private void embedBinaryMessage(byte[] audioData, String binaryMessage, int[] positions, int dataOffset,

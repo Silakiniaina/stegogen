@@ -5,10 +5,6 @@ import javax.swing.UIManager;
 
 import mg.stegogen.gui.SteganographyGUI;
 
-/**
- * Hello world!
- *
- */
 public class Steganography {
     public static void main(String[] args) {
         try {

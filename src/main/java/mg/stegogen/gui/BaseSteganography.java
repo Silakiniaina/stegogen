@@ -6,8 +6,9 @@ import java.lang.reflect.Constructor;
 import mg.stegogen.core.RandomGenerator;
 
 public abstract class BaseSteganography {
-    protected final RandomGenerator randomGenerator;
-
+    
+    private RandomGenerator randomGenerator;
+    
     /* -------------------------------------------------------------------------- */
     /*                                 Constructor                                */
     /* -------------------------------------------------------------------------- */
@@ -22,4 +23,15 @@ public abstract class BaseSteganography {
             throws IOException;
 
     public abstract String extractMessage(String inputPath, int numPositions) throws IOException;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                  Functions                                 */
+    /* -------------------------------------------------------------------------- */
+    public RandomGenerator getRandomGenerator() {
+        return randomGenerator;
+    }
+
+    public void setRandomGenerator(RandomGenerator randomGenerator) {
+        this.randomGenerator = randomGenerator;
+    }
 }

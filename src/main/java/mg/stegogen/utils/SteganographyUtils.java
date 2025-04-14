@@ -9,8 +9,7 @@ import java.util.logging.Logger;
 public class SteganographyUtils {
     private static Logger logger = Logger.getLogger(SteganographyUtils.class.getName());
     public static final int BITS_PER_BYTE = 8;
-    // Changed END_MARKER to a more distinctive pattern less likely to occur in real data
-    public static final String END_MARKER = "1010101010101010";
+    // END_MARKER removed - we no longer need this
 
     /* -------------------------------------------------------------------------- */
     /*                                  Functions                                 */

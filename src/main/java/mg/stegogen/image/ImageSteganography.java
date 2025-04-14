@@ -46,8 +46,9 @@ public class ImageSteganography extends BaseSteganography {
 
         byte[] decompressedData = extractAndDecompressIdatData(pngData);
 
-        String binaryMessage = SteganographyUtils.isBinary(message) ? (message + SteganographyUtils.END_MARKER) : 
-                                              (SteganographyUtils.textToBinary(message) + SteganographyUtils.END_MARKER);
+        // No longer append END_MARKER to the binary message
+        String binaryMessage = SteganographyUtils.isBinary(message) ? message : SteganographyUtils.textToBinary(message);
+        
         logger.info("Binary message length: " + binaryMessage.length());
         if (numPositions < binaryMessage.length()) {
             logger.severe("numPositions (" + numPositions + ") is less than binary message length (" + binaryMessage.length() + ")");
@@ -300,10 +301,11 @@ public class ImageSteganography extends BaseSteganography {
     }
 
     private String extractBinaryMessage(byte[] decompressedData, int[] positions, int width,
-        int scanlineLength, int bytesPerPixel) throws IOException {
+            int scanlineLength, int bytesPerPixel) throws IOException {
         logger.info("Extracting binary message");
         StringBuilder binaryCode = new StringBuilder();
 
+        // Extract all bits from the specified positions
         for (int i = 0; i < positions.length; i++) {
             int pixelIndex = positions[i];
             int row = pixelIndex / width;
@@ -313,24 +315,15 @@ public class ImageSteganography extends BaseSteganography {
             if (dataIndex < decompressedData.length) {
                 int extractedBit = extractLSB(decompressedData[dataIndex]);
                 binaryCode.append(extractedBit);
-                logger.fine("Extracted bit " + i + ": " + extractedBit + ", current binaryCode: " + binaryCode);
-
-                if (isEndMarkerFound(binaryCode)) {
-                    String result = trimEndMarker(binaryCode);
-                    logger.info("Binary message extracted successfully, length: " + result.length());
-                    if (result.length() == 0) {
-                        logger.severe("Extracted message is empty");
-                        throw new IOException("No valid message extracted");
-                    }
-                    return result;
-                }
             } else {
                 logger.warning("Data index " + dataIndex + " out of bounds for decompressed data length " + decompressedData.length);
             }
         }
 
-        logger.severe("No hidden code found or code is corrupted");
-        throw new IOException("No hidden code found or code is corrupted");
+        // Return all extracted bits, no need to check for END_MARKER
+        String result = binaryCode.toString();
+        logger.info("Binary message extracted successfully, length: " + result.length());
+        return result;
     }
 
     private int extractLSB(byte value) {
@@ -338,25 +331,6 @@ public class ImageSteganography extends BaseSteganography {
         int lsb = (value & 0xFF) & 0x01;
         logger.fine("LSB extracted: " + lsb);
         return lsb;
-    }
-
-    private boolean isEndMarkerFound(StringBuilder binaryCode) {
-        logger.fine("Checking for end marker");
-        int codeLength = binaryCode.length();
-        int markerLength = SteganographyUtils.END_MARKER.length();
-
-        boolean found = codeLength >= markerLength &&
-                binaryCode.substring(codeLength - markerLength).equals(SteganographyUtils.END_MARKER);
-        logger.fine("End marker found: " + found);
-        return found;
-    }
-
-    private String trimEndMarker(StringBuilder binaryCode) {
-        logger.info("Trimming end marker");
-        int endMarkerLength = SteganographyUtils.END_MARKER.length();
-        String result = binaryCode.substring(0, binaryCode.length() - endMarkerLength);
-        logger.info("End marker trimmed successfully");
-        return result;
     }
 
     private void validatePositionsCount(int numPositions, int totalPixels) {

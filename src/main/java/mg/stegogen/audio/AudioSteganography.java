@@ -102,7 +102,8 @@ public class AudioSteganography extends BaseSteganography{
     }
 
     private String prepareBinaryMessage(String message) {
-        return SteganographyUtils.textToBinary(message) + SteganographyUtils.END_MARKER;
+        // No longer append END_MARKER
+        return SteganographyUtils.textToBinary(message);
     }
 
     private void validateMessageAndPositions(String binaryMessage, int numPositions, int numSamples) {
@@ -160,6 +161,7 @@ public class AudioSteganography extends BaseSteganography{
             throws IOException {
         StringBuilder binaryMessage = new StringBuilder();
 
+        // Extract all bits from the specified positions
         for (int i = 0; i < positions.length; i++) {
             int sampleIndex = positions[i];
             int sampleOffset = calculateSampleOffset(dataOffset, sampleIndex, metadata.bytesPerSample,
@@ -167,13 +169,10 @@ public class AudioSteganography extends BaseSteganography{
 
             int extractedBit = extractBitFromSample(audioData, sampleOffset, metadata.bitsPerSample);
             binaryMessage.append(extractedBit);
-
-            if (isEndMarkerFound(binaryMessage)) {
-                return trimEndMarker(binaryMessage);
-            }
         }
 
-        throw new IOException("No hidden code found or code is corrupted");
+        // No longer check for END_MARKER - return all extracted bits
+        return binaryMessage.toString();
     }
 
     private int extractBitFromSample(byte[] audioData, int sampleOffset, int bitsPerSample) {
@@ -195,18 +194,5 @@ public class AudioSteganography extends BaseSteganography{
             return sample & 0x01;
         }
         return 0; // Default return if sample can't be read
-    }
-
-    private boolean isEndMarkerFound(StringBuilder binaryMessage) {
-        int length = binaryMessage.length();
-        int markerLength = SteganographyUtils.END_MARKER.length();
-
-        return length >= markerLength &&
-                binaryMessage.substring(length - markerLength).equals(SteganographyUtils.END_MARKER);
-    }
-
-    private String trimEndMarker(StringBuilder binaryMessage) {
-        int endMarkerLength = SteganographyUtils.END_MARKER.length();
-        return binaryMessage.substring(0, binaryMessage.length() - endMarkerLength);
     }
 }

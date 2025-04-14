@@ -1,7 +1,6 @@
 package mg.stegogen.gui;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 
 import mg.stegogen.core.RandomGenerator;
 

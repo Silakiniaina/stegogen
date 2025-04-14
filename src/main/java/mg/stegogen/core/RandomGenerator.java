@@ -9,6 +9,7 @@ public class RandomGenerator {
     private long increment;
     private long modulus;
     private long currentValue;
+    private int[] customPositions = null;  // Added to store custom positions
 
     /* -------------------------------------------------------------------------- */
     /*                                Constructors                                */
@@ -58,6 +59,13 @@ public class RandomGenerator {
 
     public int[] generateUniquePositions(int count, int bound) {
         logger.info("Generating " + count + " unique positions with bound: " + bound);
+        
+        // If custom positions are set, return those instead of generating new ones
+        if (customPositions != null) {
+            logger.info("Returning custom positions instead of generating random ones");
+            return customPositions;
+        }
+        
         if (count > bound) {
             logger.severe("Count " + count + " exceeds bound " + bound);
             throw new IllegalArgumentException("Cannot generate more unique positions than the bound");
@@ -79,6 +87,9 @@ public class RandomGenerator {
         }
 
         logger.info("Generated " + count + " unique positions successfully");
+        for (int i = 0; i < positions.length; i++) {
+            logger.fine("Position " + i + ": " + positions[i]);
+        }
         return positions;
     }
 
@@ -86,6 +97,23 @@ public class RandomGenerator {
         logger.info("Resetting RandomGenerator to seed: " + seed);
         currentValue = seed;
         logger.info("Reset completed");
+    }
+    
+    /**
+     * Sets custom positions to be used instead of generating random ones
+     * @param positions Array of custom positions
+     */
+    public void setCustomPositions(int[] positions) {
+        logger.info("Setting custom positions array of length: " + positions.length);
+        this.customPositions = positions;
+    }
+    
+    /**
+     * Clears custom positions so random generation will be used again
+     */
+    public void clearCustomPositions() {
+        logger.info("Clearing custom positions");
+        this.customPositions = null;
     }
     
     /* -------------------------------------------------------------------------- */

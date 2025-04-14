@@ -41,7 +41,12 @@ public class SteganographyUtils {
     }
 
     public static String textToBinary(String text) {
-        logger.info("Converting text "+text+" to binary");
+        logger.info("Processing text: " + text);
+        if (isBinary(text)) {
+            logger.info("Text is already binary, returning unchanged: " + text);
+            return text;
+        }
+        logger.info("Converting text to binary");
         StringBuilder binaryBuilder = new StringBuilder();
         for (char c : text.toCharArray()) {
             String binary = Integer.toBinaryString(c);
@@ -50,7 +55,7 @@ public class SteganographyUtils {
             }
             binaryBuilder.append(binary);
         }
-        logger.info("Successfully converted text "+text+" to binary "+binaryBuilder.toString());
+        logger.info("Successfully converted text to binary: " + binaryBuilder.toString());
         return binaryBuilder.toString();
     }
 
